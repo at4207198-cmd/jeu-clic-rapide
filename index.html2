@@ -1,0 +1,177 @@
+index html<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu du clic rapide</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            overflow: hidden;
+            background: linear-gradient(to right, #89f7fe, #66a6ff);
+            transition: background 0.5s;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 48px;
+            margin-top: 20px;
+        }
+
+        p {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        #jeuBouton {
+            padding: 20px 40px;
+            font-size: 22px;
+            cursor: pointer;
+            position: absolute;
+            border: none;
+            border-radius: 12px;
+            background-color: #ff6b6b;
+            color: white;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+
+        #jeuBouton:hover {
+            transform: scale(1.2);
+            background-color: #ff3b3b;
+        }
+
+        #gameOver {
+            font-size: 32px;
+            color: yellow;
+            display: none;
+            margin-top: 30px;
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        #rejouer {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        @keyframes scoreFlash {
+            0% { color: yellow; transform: scale(1); }
+            50% { color: white; transform: scale(1.3); }
+            100% { color: yellow; transform: scale(1); }
+        }
+
+        .flash {
+            animation: scoreFlash 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Jeu du clic rapide ! 🎯</h1>
+<p>Temps restant : <span id="timer">30</span> secondes</p>
+<p>Score : <span id="score">0</span></p>
+<p>Meilleur score : <span id="bestScore">0</span></p>
+
+<button id="jeuBouton" onclick="cliquer()">Clique-moi !</button>
+<p id="gameOver"></p>
+<button id="rejouer" onclick="rejouer()">Rejouer</button>
+
+<script>
+    let score = 0;
+    let temps = 30;
+    let jeuEnCours = true;
+
+    const timerElement = document.getElementById("timer");
+    const scoreElement = document.getElementById("score");
+    const gameOverElement = document.getElementById("gameOver");
+    const bouton = document.getElementById("jeuBouton");
+    const body = document.body;
+    const bestScoreElement = document.getElementById("bestScore");
+    const rejouerBtn = document.getElementById("rejouer");
+
+    // Récupérer le meilleur score
+    let bestScore = localStorage.getItem("bestScore") || 0;
+    bestScoreElement.innerText = bestScore;
+
+    let interval;
+
+    function demarrerJeu() {
+        temps = 30;
+        score = 0;
+        jeuEnCours = true;
+        scoreElement.innerText = score;
+        timerElement.innerText = temps;
+        gameOverElement.style.display = "none";
+        bouton.style.display = "inline-block";
+        rejouerBtn.style.display = "none";
+
+        interval = setInterval(() => {
+            if(temps > 0){
+                temps--;
+                timerElement.innerText = temps;
+            } else {
+                clearInterval(interval);
+                finJeu();
+            }
+        }, 1000);
+    }
+
+    demarrerJeu();
+
+    function cliquer() {
+        if(!jeuEnCours) return;
+
+        score++;
+        scoreElement.innerText = score;
+
+        scoreElement.classList.remove("flash");
+        void scoreElement.offsetWidth;
+        scoreElement.classList.add("flash");
+
+        deplacerBouton();
+        changerCouleurFond();
+    }
+
+    function deplacerBouton() {
+        const maxX = window.innerWidth - bouton.offsetWidth;
+        const maxY = window.innerHeight - bouton.offsetHeight;
+
+        const x = Math.floor(Math.random() * maxX);
+        const y = Math.floor(Math.random() * maxY);
+
+        bouton.style.left = x + "px";
+        bouton.style.top = y + "px";
+    }
+
+    function changerCouleurFond() {
+        const couleurs = ["#89f7fe", "#66a6ff", "#fbc2eb", "#a6c0fe", "#f6d365"];
+        const couleur = couleurs[Math.floor(Math.random() * couleurs.length)];
+        body.style.background = `linear-gradient(to right, ${couleur}, #66a6ff)`;
+    }
+
+    function finJeu() {
+        jeuEnCours = false;
+        bouton.style.display = "none";
+        gameOverElement.style.display = "block";
+        gameOverElement.innerText = "Game Over ! Ton score final : " + score;
+        rejouerBtn.style.display = "inline-block";
+
+        if(score > bestScore){
+            bestScore = score;
+            localStorage.setItem("bestScore", bestScore);
+            bestScoreElement.innerText = bestScore;
+            alert("🎉 Nouveau meilleur score !");
+        }
+    }
+
+    function rejouer() {
+        demarrerJeu();
+    }
+</script>
+
+</body>
+  </html>
